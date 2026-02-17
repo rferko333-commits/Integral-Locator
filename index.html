@@ -71,7 +71,32 @@
         /* Utility */
         .hidden { display: none; }
         .time-estimate { text-align: center; margin-top: 10px; font-weight: bold; color: var(--amber); }
+/* NEW STYLES FOR UPGRADE */
+        .cog-box { 
+            background: rgba(26, 188, 156, 0.1); 
+            border: 2px solid var(--teal); 
+            padding: 20px; 
+            border-radius: 8px; 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .cog-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); }
+        .cog-value { font-size: 2rem; font-weight: bold; margin: 10px 0; }
+        
+        .insight-card { 
+            background: #2c3e50; /* Darker background for contrast */
+            border-left: 5px solid var(--orange); 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            font-size: 0.95rem;
+            color: #ecf0f1;
+        }
 
+        .legend-container { margin-top: 40px; border-top: 1px solid #333; padding-top: 20px; }
+        .legend-item { margin-bottom: 15px; }
+        .legend-title { font-weight: bold; color: var(--teal); cursor: pointer; }
+        .legend-desc { font-size: 0.9rem; color: #bdc3c7; margin-top: 5px; }
+        .higher-levels { border: 1px dashed var(--orange); padding: 15px; margin-top: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -108,7 +133,17 @@
         <!-- NEW WRAPPER STARTS HERE -->
         <div id="results-capture" style="padding: 20px; background-color: var(--card); border-radius: 12px;">
             <h2>Your Integral Psychograph</h2>
-            
+            <!-- 1. Center of Gravity Display -->
+            <div class="cog-box">
+                <div class="cog-title">Your Center of Gravity</div>
+                <div class="cog-value" id="cogResult">Calculating...</div>
+                <div id="cogDescription" style="font-size: 0.9rem; opacity: 0.8;"></div>
+            </div>
+
+            <!-- 2. Imbalance Insights -->
+            <div id="insightContainer">
+                <!-- Insights populated by JS -->
+            </div>
             <!-- Radar Chart -->
             <div class="chart-container">
                 <canvas id="radarChart"></canvas>
@@ -121,7 +156,58 @@
             </div>
         </div>
         <!-- NEW WRAPPER ENDS HERE -->
+<!-- 3. Legend (Excluded from PNG) -->
+        <div class="legend-container">
+            <h3>Level Descriptions</h3>
+            
+            <div class="legend-item">
+                <div class="legend-title" style="color: var(--red);">Red (Egocentric)</div>
+                <div class="legend-desc">Impulsive, power-oriented, survival-focused. "My way or the highway."</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-title" style="color: var(--amber);">Amber (Ethnocentric)</div>
+                <div class="legend-desc">Conformist, rule-oriented, disciplined. Values order, tradition, and "us vs. them."</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-title" style="color: var(--orange);">Orange (Worldcentric-Rational)</div>
+                <div class="legend-desc">Achievement-oriented, scientific, strategic. Values logic, meritocracy, and individual success.</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-title" style="color: var(--green);">Green (Worldcentric-Pluralistic)</div>
+                <div class="legend-desc">Sensitive, egalitarian, relativistic. Values diversity, feelings, and deconstructing hierarchies.</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-title" style="color: var(--teal);">Teal (Integral-Systemic)</div>
+                <div class="legend-desc">Flex-flow, systemic, multi-perspectival. Integrates previous stages and manages complexity without judgment.</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-title" style="color: var(--turquoise);">Turquoise (Integral-Holistic)</div>
+                <div class="legend-desc">Global mind, union of feeling and knowing. Sees the world as a single, living organism.</div>
+            </div>
 
+            <!-- HIGHER LEVELS -->
+            <div class="higher-levels">
+                <h4 style="margin-top:0; color: var(--orange);">Higher Levels (Not Tested)</h4>
+                <p style="font-size: 0.85rem; color: #999;">These are the transpersonal/spiritual stages beyond standard development. They are difficult to test via multiple choice as they represent states of being rather than conceptual frameworks.</p>
+                
+                <div class="legend-item">
+                    <div class="legend-title" style="color: #8e44ad;">Indigo (Para-Mind)</div>
+                    <div class="legend-desc">The beginning of true trans-rational awareness. Intuition becomes a reliable mode of cognition.</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-title" style="color: #9b59b6;">Violet (Meta-Mind)</div>
+                    <div class="legend-desc">Subtle-level awareness. Perception of energy, archetypes, and the "soul" dimension beyond the physical.</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-title" style="color: #ffffff;">Ultraviolet (Over-Mind)</div>
+                    <div class="legend-desc">Causal-level awareness. The Witness. Resting in the pure, empty screen on which reality is projected.</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-title" style="color: #ecf0f1; text-shadow: 0 0 5px white;">Clear Light (Super-Mind)</div>
+                    <div class="legend-desc">Non-dual. The collapse of the Witness and the Witnessed. Form is Emptiness, Emptiness is Form. Pure Is-ness.</div>
+                </div>
+            </div>
+        </div>
         <!-- Buttons represent the stuff being excluded from the image -->
         <button class="next-btn" style="background-color: var(--orange); margin-bottom: 15px;" onclick="downloadResults()">Download Results as PNG</button>
         <button class="start-btn" onclick="location.reload()">Retake Assessment</button>
@@ -668,41 +754,102 @@ function showResults() {
     const labels = [];
     const averages = [];
     const colors = [];
+    
+    // Variables for Center of Gravity
+    let totalScoreSum = 0;
+    let totalQuestionsCount = 0;
 
     const barContainer = document.getElementById('barContainer');
+    barContainer.innerHTML = ''; // Clear previous results
 
     Object.keys(results).forEach(line => {
         const scores = results[line];
-        const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-        
-        labels.push(line);
-        averages.push(avg);
-        
-        // Determine dominant color for Chart
-        const colorIndex = Math.min(Math.floor(avg) - 1, 5);
-        const color = COLOR_MAP[Math.max(0, colorIndex)];
-        colors.push(color);
+        if(scores.length > 0) {
+            const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+            
+            // Add to Grand Total
+            totalScoreSum += scores.reduce((a, b) => a + b, 0);
+            totalQuestionsCount += scores.length;
 
-        // Render Bar HTML
-        const widthPct = (avg / 6) * 100;
-        const html = `
-            <div class="level-bar-row">
-                <div class="level-label">${line}</div>
-                <div class="level-track">
-                    <div class="level-fill" style="width: ${widthPct}%; background-color: ${color};"></div>
+            labels.push(line);
+            averages.push(avg);
+            
+            const colorIndex = Math.min(Math.floor(avg) - 1, 5);
+            const color = COLOR_MAP[Math.max(0, colorIndex)];
+            colors.push(color);
+
+            const widthPct = (avg / 6) * 100;
+            const html = `
+                <div class="level-bar-row">
+                    <div class="level-label">${line}</div>
+                    <div class="level-track">
+                        <div class="level-fill" style="width: ${widthPct}%; background-color: ${color};"></div>
+                    </div>
+                    <div class="level-score">${avg.toFixed(1)}</div>
                 </div>
-                <div class="level-score">${avg.toFixed(1)}</div>
-            </div>
-        `;
-        barContainer.innerHTML += html;
+            `;
+            barContainer.innerHTML += html;
+        }
     });
 
-    // Send data to backend (Function below)
-    sendDataToBackend(results, averages);
+    // ------------------------------------------
+    // 1. CALCULATE CENTER OF GRAVITY
+    // ------------------------------------------
+    const grandAvg = totalScoreSum / totalQuestionsCount;
+    let cogLabel = "";
+    if (grandAvg < 1.5) cogLabel = "Red (Egocentric)";
+    else if (grandAvg < 2.5) cogLabel = "Amber (Ethnocentric)";
+    else if (grandAvg < 3.5) cogLabel = "Orange (Rational)";
+    else if (grandAvg < 4.5) cogLabel = "Green (Pluralistic)";
+    else if (grandAvg < 5.5) cogLabel = "Teal (Integral)";
+    else cogLabel = "Turquoise (Holistic)";
 
-    // RENDER CHART.JS RADAR
+    document.getElementById('cogResult').innerText = cogLabel;
+    document.getElementById('cogDescription').innerText = `Aggregate Score: ${grandAvg.toFixed(2)}`;
+
+    // ------------------------------------------
+    // 2. GENERATE INSIGHTS (IMBALANCE DETECTOR)
+    // ------------------------------------------
+    const insightContainer = document.getElementById('insightContainer');
+    insightContainer.innerHTML = ''; // Clear old
+
+    // Helper to find score by line name
+    const getScore = (name) => {
+        const idx = labels.indexOf(name);
+        return idx !== -1 ? averages[idx] : null;
+    };
+
+    const cogScore = getScore("Cognitive");
+    const emoScore = getScore("Emotional");
+    const morScore = getScore("Moral");
+    const spiScore = getScore("Spiritual");
+    const valScore = getScore("Values");
+
+    // Insight Logic
+    if (cogScore && emoScore && (cogScore - emoScore > 1.2)) {
+        insightContainer.innerHTML += `<div class="insight-card"><strong>⚠️ Head/Heart Gap:</strong> Your Cognitive development is significantly ahead of your Emotional line. You may be intellectualizing your feelings rather than processing them.</div>`;
+    }
+    
+    if (spiScore && morScore && (spiScore - morScore > 1.5)) {
+        insightContainer.innerHTML += `<div class="insight-card"><strong>⚠️ Spiritual Bypassing Risk:</strong> Your Spiritual line is much higher than your Moral line. Be careful not to use spiritual concepts to avoid dealing with ethical responsibilities.</div>`;
+    }
+
+    if (valScore && cogScore && (valScore - cogScore > 1.0)) {
+        insightContainer.innerHTML += `<div class="insight-card"><strong>⚠️ Aspirational Gap:</strong> Your Values are higher than your Cognition. You likely value high ideals (like world peace or systems thinking) but may struggle to design the practical strategies to achieve them.</div>`;
+    }
+    
+    if (insightContainer.innerHTML === '') {
+        insightContainer.innerHTML = `<div class="insight-card" style="border-left-color: var(--green);"><strong>✅ Balanced Growth:</strong> Your lines of development are relatively even. You are growing in a healthy, integrated way.</div>`;
+    }
+
+    // ------------------------------------------
+    // 3. RENDER CHART
+    // ------------------------------------------
+    // Destroy old chart if exists to prevent glitching on retake
+    if(window.myRadarChart) window.myRadarChart.destroy();
+
     const ctx = document.getElementById('radarChart').getContext('2d');
-    new Chart(ctx, {
+    window.myRadarChart = new Chart(ctx, {
         type: 'radar',
         data: {
             labels: labels,
@@ -720,9 +867,14 @@ function showResults() {
                 r: {
                     min: 0,
                     max: 6,
-                    ticks: { stepSize: 1, showLabelBackdrop: false },
-                    pointLabels: { font: { size: 14 } }
+                    ticks: { stepSize: 1, showLabelBackdrop: false, color: '#666' },
+                    pointLabels: { font: { size: 14 }, color: '#ccc' },
+                    grid: { color: '#444' },
+                    angleLines: { color: '#444' }
                 }
+            },
+            plugins: {
+                legend: { display: false }
             }
         }
     });
