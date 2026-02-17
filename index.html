@@ -30,7 +30,12 @@
         /* Selection Screen */
         .line-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .line-checkbox { display: flex; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; transition: 0.2s; }
-        .line-checkbox:hover { background-color: #ecf0f1; }
+        /* Update the .line-checkbox:hover style */
+.line-checkbox:hover { 
+    background-color: #ecf0f1; 
+    color: #121212; /* This makes text dark when hovering */
+}
+
         .line-checkbox input { margin-right: 10px; transform: scale(1.2); }
         
         .start-btn, .next-btn { display: block; width: 100%; padding: 15px; background-color: var(--teal); color: white; border: none; border-radius: 6px; font-size: 1.2rem; cursor: pointer; margin-top: 20px; transition: background 0.3s; }
@@ -45,7 +50,12 @@
         .question-text { font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; }
         .options-list { list-style: none; padding: 0; }
         .option-item { padding: 15px; margin-bottom: 10px; border: 2px solid #ecf0f1; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .option-item:hover { border-color: var(--teal); background-color: #e8f8f5; }
+        /* Update the .option-item:hover style */
+.option-item:hover { 
+    border-color: var(--teal); 
+    background-color: #e8f8f5; 
+    color: #121212; /* This makes text dark when hovering */
+}
         .option-item.selected { border-color: var(--teal); background-color: var(--teal); color: white; }
 
         /* Results Interface */
@@ -94,27 +104,32 @@
 
     <!-- STEP 3: RESULTS -->
     <div id="results-section">
-        <h2>Your Integral Psychograph</h2>
         
-        <!-- Radar Chart -->
-        <div class="chart-container">
-            <canvas id="radarChart"></canvas>
-        </div>
+        <!-- NEW WRAPPER STARTS HERE -->
+        <div id="results-capture" style="padding: 20px; background-color: var(--card); border-radius: 12px;">
+            <h2>Your Integral Psychograph</h2>
+            
+            <!-- Radar Chart -->
+            <div class="chart-container">
+                <canvas id="radarChart"></canvas>
+            </div>
 
-        <!-- Bar Breakdown -->
-        <h3>Detailed Levels</h3>
-        <div class="level-bars" id="barContainer">
-            <!-- Bars populated by JS -->
+            <!-- Bar Breakdown -->
+            <h3>Detailed Levels</h3>
+            <div class="level-bars" id="barContainer">
+                <!-- Bars populated by JS -->
+            </div>
         </div>
-<button class="next-btn" style="background-color: var(--orange); margin-bottom: 15px;" onclick="downloadResults()">Download Results as PNG</button>
+        <!-- NEW WRAPPER ENDS HERE -->
+
+        <!-- Buttons represent the stuff being excluded from the image -->
+        <button class="next-btn" style="background-color: var(--orange); margin-bottom: 15px;" onclick="downloadResults()">Download Results as PNG</button>
         <button class="start-btn" onclick="location.reload()">Retake Assessment</button>
+        
         <p style="text-align: center; font-size: 0.8rem; margin-top: 20px; color: #999;">
-            Note: Results are estimates based on self-reporting. <br>
-            Data sent to backend for anonymous analysis.
+            Note: Results are estimates based on self-reporting.
         </p>
     </div>
-</div>
-
 <script>
 // ==========================================
 // DATA MATRIX (The Content)
@@ -751,10 +766,12 @@ function downloadResults() {
     // Scroll to top to ensure capture isn't cut off
     window.scrollTo(0,0);
     
-    const element = document.querySelector(".container");
+    // TARGET THE NEW ID HERE
+    const element = document.getElementById("results-capture");
     
     html2canvas(element, {
-        backgroundColor: "#1e1e1e" // Matches your new card color
+        backgroundColor: "#1e1e1e", // Matches your dark card color
+        scale: 2 // Higher resolution
     }).then(canvas => {
         const link = document.createElement('a');
         link.download = filename + '.png';
